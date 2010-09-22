@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/zerobubble/!svn/ver/11339/saveguards/trunk/py/django_ogone/django_ogone
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/zerobubble/!svn/ver/11339/saveguards/trunk/py/django_ogone/django_ogone/__init__.py
+END
+signals.py
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/zerobubble/!svn/ver/11339/saveguards/trunk/py/django_ogone/django_ogone/signals.py
+END
+exceptions.py
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/zerobubble/!svn/ver/11339/saveguards/trunk/py/django_ogone/django_ogone/exceptions.py
+END
+forms.py
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/zerobubble/!svn/ver/11339/saveguards/trunk/py/django_ogone/django_ogone/forms.py
+END
+ogone.py
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/zerobubble/!svn/ver/11339/saveguards/trunk/py/django_ogone/django_ogone/ogone.py
+END
+ogone_settings.py
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/zerobubble/!svn/ver/11339/saveguards/trunk/py/django_ogone/django_ogone/ogone_settings.py
+END
