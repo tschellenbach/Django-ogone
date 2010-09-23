@@ -132,6 +132,15 @@ class Ogone(object):
         if secret == ogone_settings.SHA_PRE_SECRET and out:
             secret = ogone_settings.SHA_POST_SECRET
         return OgoneSignature(data, hash_method, secret).signature()
+
+    @classmethod
+    def get_action(self, production=ogone_settings.PRODUCTION):
+        """ Get the relevant action parameter from the settings. """
+    
+        if production:
+            return ogone_settings.PROD.URL
+        else:
+            return ogone_settings.TEST_URL
     
     def is_valid(self):
         '''
@@ -188,6 +197,7 @@ class Ogone(object):
             mail_admins(subject, message, fail_silently=True)
         return status_category
     
+
 if __name__ == '__main__':
 
     import doctest

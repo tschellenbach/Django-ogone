@@ -24,3 +24,10 @@ HASH_METHOD = getattr(settings, 'OGONE_HASH_METHOD', 'sha512')
 #for other hashmethods see http://docs.python.org/library/hashlib.html
 #ogone default is sha1
 PRODUCTION = not getattr(settings, 'DEBUG', True)
+
+# Standard URLs. We might want to override these in the future for some
+# reason.
+TEST_URL = getattr(settings, "OGONE_TEST_URL", 
+    "https://secure.ogone.com/ncol/test/orderstandard.asp")
+PROD_URL = getattr(settings, "OGONE_PROD_URL", 
+    "https://secure.ogone.com/ncol/prod/orderstandard.asp")
