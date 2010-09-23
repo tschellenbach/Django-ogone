@@ -14,9 +14,9 @@ It is Django specific in nature, but hopefully the clean seperation will allow f
 ## Step 1 - settings ##
 
 Look at the ogone settings file and define the required settings in your django settings file
-- OGONE_PSPID
-- OGONE_SHA_PRE_SECRET
-- OGONE_SHA_POST_SECRET
+- `OGONE_PSPID`
+- `OGONE_SHA_PRE_SECRET`
+- `OGONE_SHA_POST_SECRET`
 The secrets are just for hashing purposes. Fill in the same random value here as in the ogone admin.
 While you are in the ogone admin set the sha method to sha512.
 Furthermore enable the send parameters option for the payment feedback.
@@ -30,26 +30,24 @@ Therefore your form must be generated dynamically.
 This project provides an easy dynamic form to help you with that.
 Here an example implementation:
 
-from django_ogone import forms as ogone_forms
-from django_ogone.ogone import Ogone
-from django_ogone import settings as ogone_settings  
 
-def checkout(request):
-    data = {}
-    #transaction data
-    data['orderID'] = '1'
-    data['amount'] = '500'
-    data['currency'] = 'EUR'
-    data['language'] = 'en'
-    data['SHASign'] = Ogone.sign(data)
+    from django_ogone import forms as ogone_forms
+    from django_ogone.ogone import Ogone
+    from django_ogone import settings as ogone_settings  
+
+    def checkout(request):
+        data = {}
+        #transaction data
+        data['PSPID'] = ogone_settings.PSPID
+        data['orderID'] = '1'
+        data['amount'] = '500'
+        data['currency'] = 'EUR'
+        data['language'] = 'en'
+        data['SHASign'] = Ogone.sign(data)
     
-    context = {}
-    context['form'] = ogone_forms.OgoneForm(data)
-    
-    if ogone_settings.PRODUCTION:
-        request.context['action'] = 'https://secure.ogone.com/ncol/test/orderstandard.asp'
-    else:
-        request.context['action'] = 'https://secure.ogone.com/ncol/prod/orderstandard.asp'
+        context = {}
+        context['form'] = ogone_forms.OgoneForm(data)
+        context['action'] = Ogone.get_action()
         
 
 This form enables you to send a secured payment request to ogone.
