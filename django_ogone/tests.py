@@ -1,7 +1,7 @@
 import unittest
 import doctest
 
-from django_ogone import ogone
+from django_ogone import security
 
 # class FooTestCase(unittest.TestCase):
 #     def testFoo(self):
@@ -9,6 +9,6 @@ from django_ogone import ogone
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(ogone))
+    suite.addTest(doctest.DocTestSuite(security))
     #suite.addTest(unittest.TestLoader().loadTestsFromTestCase(FooTestCase))
     return suite
