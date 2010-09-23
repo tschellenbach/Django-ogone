@@ -1,5 +1,5 @@
 from django import forms
-from django_ogone import ogone_settings
+from django_ogone import settings as ogone_settings
 
 class OgoneForm(forms.Form):
     """dynamic ogone form"""

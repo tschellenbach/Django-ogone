@@ -32,7 +32,7 @@ Here an example implementation:
 
 from django_ogone import forms as ogone_forms
 from django_ogone.ogone import Ogone
-from django_ogone import ogone_settings  
+from django_ogone import settings as ogone_settings  
 
 def checkout(request):
     data = {}

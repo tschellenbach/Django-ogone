@@ -4,7 +4,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 from django.core.mail import mail_admins
 from django_ogone import exceptions as ogone_exceptions
 
-from django_ogone import ogone_settings
+from django_ogone import settings as ogone_settings
 import hashlib
 
 
