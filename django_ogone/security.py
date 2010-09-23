@@ -1,6 +1,6 @@
 import hashlib, logging
 
-from django_ogone.alternative_signing import create_hash
+from alternative_signing import create_hash
 
 class OgoneSignature(object):
     '''
@@ -107,3 +107,9 @@ class OgoneSignature(object):
 
     def __unicode__(self):
         return self.signature()
+
+
+if __name__ == '__main__':
+
+    import doctest
+    doctest.testmod()
