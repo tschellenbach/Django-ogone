@@ -1,6 +1,3 @@
-import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-
 from django.core.mail import mail_admins
 from django_ogone import exceptions as ogone_exceptions
 
@@ -213,9 +210,4 @@ class Ogone(object):
             message = "Unknown ogone status code: %s\n\n%s" % (status, request_repr)
             mail_admins(subject, message, fail_silently=True)
         return status_category
-    
 
-if __name__ == '__main__':
-
-    import doctest
-    doctest.testmod()
