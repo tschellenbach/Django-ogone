@@ -1,8 +1,10 @@
 import logging
 
 from django.core.mail import mail_admins
-from django_ogone import exceptions as ogone_exceptions
 
+from django_ogone import status_codes
+
+from django_ogone import exceptions as ogone_exceptions
 from django_ogone import settings as ogone_settings
 from django_ogone import security as ogone_security
 
@@ -82,37 +84,21 @@ class Ogone(object):
         '''
         from django.conf import settings
 
+        logging.debug('Processing status message from Ogone. Params: %s', self.params)
         status = int(self.params.get('STATUS', None))
-        status_category = 'not_processed'
 
-        if status == 9:
-            status_category = 'accepted'
-            # send ogone_payment_accepted signal with amount converted to Decimal and cents
-            #signals.ogone_payment_accepted.send(sender=OrderStatus, order_id=order_id,
-            #    amount=Decimal(amount) * 100, currency=currency)
-        elif status == 1:
-            status_category = 'cancelled'
-        elif status in [0,2,4,41,5,51,52,59,6,61,62,63,7,71,72,73,74,75,
-            8,81,82,83,84,85,91,92,93,94,95,97,98,99]:
-            status_category = 'not_processed'
-        else:
-            # It is better to raise an exception here which will be emailed
-            # or caught otherwise by a well-configured Django instance.
+        if status in status_codes.ACCEPTED:            
+            signals.ogone_payment_accepted.send(order_id=order_id,
+                    amount=Decimal(self.params.get('AMOUNT'))/100, 
+                    currency=Decimal(self.params.get('CURRENCY')))
 
-            # Ie. No need to do this ourselves.
-
-            # mail_admins
-            request = self.request
-            if request:
-                subject = 'Error (%s IP): %s' % \
-                    ((request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS and 'internal' or 'EXTERNAL'), request.path)
-            else:
-                subject = 'Unknown status code'
-            try:
-                request_repr = repr(request)
-            except:
-                request_repr = "Request repr() unavailable"
-            message = "Unknown ogone status code: %s\n\n%s" % (status, request_repr)
-            mail_admins(subject, message, fail_silently=True)
-        return status_category
+            return status_codes.ACCEPTED
+        
+        if status in status_codes.CANCELLED:
+            return status_codes.CANCELLED
+            
+        if status in status_codes.NOT_PROCESSED:
+            return status_codes.NOT_PROCESSED
+            
+        raise UnknownStatusException(status)
 
