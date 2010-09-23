@@ -6,6 +6,7 @@ from django_ogone import exceptions as ogone_exceptions
 from django_ogone import settings as ogone_settings
 import hashlib
 
+from django_ogone.alternative_signing import create_hash
 
 class OgoneSignature(object):
     '''
@@ -106,6 +107,8 @@ class OgoneSignature(object):
         
         signed = self._sign_string(pre_sign_string)
         logging.debug('Signed data: %s', signed)
+        
+        assert create_hash(self.data, self.secret, getattr(hashlib, self.hash_method)) == signed
         
         return signed
 
