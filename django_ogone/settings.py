@@ -15,8 +15,8 @@ Change this in your ogone admin interface
 
 #These four you probably want to change
 PSPID = getattr(settings, 'OGONE_PSPID')
-SHA_PRE_SECRET = getattr(settings, 'OGONE_SHA_PRE_SECRET', '')
-SHA_POST_SECRET = getattr(settings, 'OGONE_SHA_POST_SECRET', '')
+SHA_PRE_SECRET = getattr(settings, 'OGONE_SHA_PRE_SECRET')
+SHA_POST_SECRET = getattr(settings, 'OGONE_SHA_POST_SECRET')
 CURRENCY = getattr(settings, 'OGONE_CURRENCY', 'EUR')
 
 #only touch these if you know whats happening :P
