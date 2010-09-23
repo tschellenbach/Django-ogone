@@ -13,10 +13,11 @@ It is Django specific in nature, but hopefully the clean seperation will allow f
 
 ## Step 1 - settings ##
 
-Look at the ogone settings file and define the required settings in your django settings file
+Look at the ogone settings file and define the required settings in your django settings file:
 - `OGONE_PSPID`
 - `OGONE_SHA_PRE_SECRET`
 - `OGONE_SHA_POST_SECRET`
+
 The secrets are just for hashing purposes. Fill in the same random value here as in the ogone admin.
 While you are in the ogone admin set the sha method to sha512.
 Furthermore enable the send parameters option for the payment feedback.
