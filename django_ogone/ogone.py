@@ -1,3 +1,5 @@
+import logging
+
 from django.core.mail import mail_admins
 from django_ogone import exceptions as ogone_exceptions
 
@@ -94,9 +96,17 @@ class OgoneSignature(object):
         return signed
 
     def signature(self):
+        logging.debug('Making signature for data: %s', self.data)
+        
         sorted_data = self._sort_data(self.data)
+        logging.debug('Sorted data: %s', sorted_data)
+        
         pre_sign_string = self._merge_data(sorted_data)
+        logging.debug('String to sign: %s', pre_sign_string)
+        
         signed = self._sign_string(pre_sign_string)
+        logging.debug('Signed data: %s', signed)
+        
         return signed
 
     def __unicode__(self):
