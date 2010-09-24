@@ -59,8 +59,8 @@ class OgoneSignature(object):
     '''
 
     def __init__(self, data, hash_method, secret):
-        assert isinstance(hash_method, str)
-        assert isinstance(secret, str)
+        assert hash_method in ['sha1', 'sha256', 'sha512']
+        assert str(secret)
 
         self.data = data.copy()
         self.hash_method = hash_method
