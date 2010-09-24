@@ -28,7 +28,7 @@ def create_hash(params, secret, hashfunc=sha512):
     
     signstring = ''
     for key in keys:
-        if params[key]:
+        if params[key] and not key.upper() in ['SHASIGN', ]:
             # If not empty, add KEY=valuesecret to signelements
             signstring += '%s=%s%s' % (key.upper(), params[key], secret)
     
