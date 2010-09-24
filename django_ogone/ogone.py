@@ -77,7 +77,7 @@ class Ogone(object):
         if not 'settings' in kwargs:
             kwargs.update({'settings': self.settings})
 
-        return Ogone.sign(self.params, *args, **kwargs)
+        return self.sign(self.params, *args, **kwargs)
 
     def parse_params(self):
         """ Validate and convert the eligible elements to
