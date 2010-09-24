@@ -32,27 +32,23 @@ This project provides an easy dynamic form to help you with that.
 Here an example implementation:
 
 
-    from django_ogone import forms as ogone_forms
     from django_ogone.ogone import Ogone
-    from django_ogone import settings as ogone_settings  
 
     def checkout(request):
         data = {}
         #transaction data
-        data['PSPID'] = ogone_settings.PSPID
+        data['PSPID'] = 'mypspid'
         data['orderID'] = '1'
         data['amount'] = '500'
         data['currency'] = 'EUR'
         data['language'] = 'en'
-        data['SHASign'] = Ogone.sign(data)
-    
-        context = {}
-        context['form'] = ogone_forms.OgoneForm(data)
+        
+        
+        context['form'] = Ogone.get_form(data)
         context['action'] = Ogone.get_action()
         
 
 This form enables you to send a secured payment request to ogone.
-The Ogone.sign call is responsible for the hashing.
 To support more form field requests to ogone simply add them to the data dict. 
 
 
@@ -75,26 +71,19 @@ def order_status_update(request):
     - ogone server side call (in case of problems ogone will post to our server
     with an updated version ofo the payment status)
     '''
-    params = request.POST or request.GET
-    ogone = Ogone(params)
+    ogone = Ogone(request)
     
-    if ogone.is_valid():
-        #update the order data, different for each site
-        #need the ogone data and custom logic, use signals for this
-        ogone_signals.ogone_update_order.send(sender=Ogone, ogone=ogone)
-        
-        #redirect to the appropriate view
-        order_id = ogone.get_order_id()
-        url = '%s?transaction_id=%s' % (reverse('checkout'), order_id)
-        
-        return HttpResponseRedirect(url) 
-ogone_signals.ogone_update_order.connect(models.Transaction.objects.update_order)
-
-
-You will probably want to adjust the redirection behaviour in this view.
-Furthermore you should write a function to connect to the ogone_update_order signal.
-This signal allows you to automatically update the payment information
-
+    # This tests validity of the signature and 
+    # converts some types to Python stuff
+    ogone.parse_params()
+    
+    product_id = ogone.get_productid()
+    status = ogone.get_status()
+    status_description = ogone.get_status_description()
+    status_category = ogone.get_status_category()
+    
+    # DO STUFF WITH INFO
+    
 
 ### Resources ###
 
