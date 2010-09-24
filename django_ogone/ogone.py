@@ -73,6 +73,10 @@ class Ogone(object):
     def compute_signature(self, *args, **kwargs):
         """ Compute a signature for the current parameters. """
         
+        # Make sure we pass on settings
+        if not 'settings' in kwargs:
+            kwargs.update({'settings': self.settings})
+        
         return Ogone.sign(self.params, *args, **kwargs)
 
     def parse_params(self):
@@ -83,8 +87,8 @@ class Ogone(object):
         
         # We're not gonna work on an invalid form
         if not self.is_valid():
-            raise ogone_exceptions.InvalidSignatureException("ogone_signature (%s) != \nsignature (%s)" % (ogone_signature, signature))
-
+            raise ogone_exceptions.InvalidSignatureException()
+            
         # This first one creates a copy of our params dict
         self.parsed_params = self._normalize_params(self.params)
         
