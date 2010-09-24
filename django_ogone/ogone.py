@@ -78,28 +78,37 @@ class Ogone(object):
     def get_order_id(self):
         return int(self.params.get('ORDERID'))
 
-    # REWORK THIS CODE
-    # def get_status_category(self):
-    #     '''
-    #     Maps the status param to a category
-    #     '''
-    #     from django.conf import settings
-    # 
-    #     logging.debug('Processing status message from Ogone. Params: %s', self.params)
-    #     status = int(self.params.get('STATUS', None))
-    # 
-    #     if status in status_codes.SUCCESS:            
-    #         signals.ogone_payment_accepted.send(order_id=order_id,
-    #                 amount=Decimal(self.params.get('AMOUNT'))/100, 
-    #                 currency=Decimal(self.params.get('CURRENCY')))
-    # 
-    #         return status_codes.SUCCESS
-    #     
-    #     if status in status_codes.CANCELLED:
-    #         return status_codes.CANCELLED
-    #         
-    #     if status in status_codes.NOT_PROCESSED:
-    #         return status_codes.NOT_PROCESSED
-    #         
-    #     raise UnknownStatusException(status)
-    # 
+    @classmethod
+    def get_status_description(cls, status):
+        assert isinstance(status, int)
+        
+        return status_codes.STATUS_DESCRIPTIONS[status]
+        
+    def get_status_category(self):
+        """ The Ogone API allows for four kind of results:
+            - success
+            - decline
+            - exception
+            - cancel 
+            
+            In this function we do mapping from the status
+            number into one of these categories of results.
+        """
+        
+        status = int(self.params.get('STATUS', 0))
+        
+        logging.debug('Processing status message %d', status)
+        
+        if status in status_codes.SUCCESS_CODES:
+            return status_codes.SUCCESS_STATUS
+        
+        if status in status_codes.DECLINE_CODES:
+            return status_codes.DECLINE_STATUS
+        
+        if status in status_codes.EXCEPTION_CODES:
+            return status_codes.EXCEPTION_STATUS
+        
+        if status in status_codes.CANCEL_CODES:
+            return status_codes.CANCEL_STATUS
+
+        raise UnknownStatusException(status)
