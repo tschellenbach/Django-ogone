@@ -1,6 +1,6 @@
 import logging
 
-from django.core.mail import mail_admins
+log = logging.getLogger('djanongo_ogone')
 
 from django_ogone import status_codes
 
@@ -158,7 +158,7 @@ class Ogone(object):
         data['PSPID'] = settings.PSPID
         data['SHASign'] = cls.sign(data, settings=settings)
 
-        logging.debug('Sending the following data to Ogone: %s', data)
+        log.debug('Sending the following data to Ogone: %s', data)
         form = ogone_forms.OgoneForm(data)
 
         return form

@@ -1,5 +1,7 @@
 import logging
 
+log = logging.getLogger('djanongo_ogone')
+
 from hashlib import sha1, sha512
 
 def create_hash(params, secret, hashfunc=sha512):
@@ -18,13 +20,13 @@ def create_hash(params, secret, hashfunc=sha512):
     
     """
     
-    logging.debug('Creating hash using algorith %s', hashfunc)
+    log.debug('Creating hash using algorith %s', hashfunc)
     
     # First, sort out the keys
     keys = params.keys()
     keys.sort(key=lambda x: x.upper())
     
-    logging.debug('Sorted keys: %s', keys)
+    log.debug('Sorted keys: %s', keys)
     
     signstring = ''
     for key in keys:
@@ -32,7 +34,7 @@ def create_hash(params, secret, hashfunc=sha512):
             # If not empty, add KEY=valuesecret to signelements
             signstring += '%s=%s%s' % (key.upper(), params[key], secret)
     
-    logging.debug('String to sign: (alternative) %s', signstring)
+    log.debug('String to sign: (alternative) %s', signstring)
     
     # Join the string
     signstring = ''.join(signstring)
@@ -43,7 +45,7 @@ def create_hash(params, secret, hashfunc=sha512):
     # Uppercase the hash
     signhashupper = signhash.upper()
     
-    logging.debug('Signed data: (alternative) %s', signhashupper)
+    log.debug('Signed data: (alternative) %s', signhashupper)
     
     return signhashupper
 
