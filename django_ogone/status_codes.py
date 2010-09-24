@@ -47,7 +47,7 @@ Statuses in 1 digit are 'normal' statuses:
     * 1 means the customer cancelled the transaction.
     * 2 means the acquirer did not authorise the payment.
     * 5 means the acquirer autorised the payment.
-    * 9 means the payment was captured. 
+    * 9 means the payment was captured.
 
 Statuses in 2 digits correspond either to 'intermediary' situations or to abnormal events. When the second digit is:
 
@@ -109,7 +109,7 @@ CANCEL_STATUS = 'cancel'
 
 def get_status_description(status):
     assert isinstance(status, int)
-        
+
     return STATUS_DESCRIPTIONS[status]
 
 def get_status_category(status):
@@ -117,26 +117,26 @@ def get_status_category(status):
         - success
         - decline
         - exception
-        - cancel 
-        
+        - cancel
+
         In this function we do mapping from the status
         number into one of these categories of results.
     """
-    
+
     logging.debug('Processing status message %d', status)
-    
+
     if status in SUCCESS_CODES:
         return SUCCESS_STATUS
-    
+
     if status in DECLINE_CODES:
         return DECLINE_STATUS
-    
+
     if status in EXCEPTION_CODES:
         return EXCEPTION_STATUS
-    
+
     if status in CANCEL_CODES:
         return CANCEL_STATUS
-    
+
     from django_ogone.exceptions import UnknownStatusException
 
     raise UnknownStatusException(status)

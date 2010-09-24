@@ -27,7 +27,7 @@ PRODUCTION = not getattr(settings, 'DEBUG', True)
 
 # Standard URLs. We might want to override these in the future for some
 # reason.
-TEST_URL = getattr(settings, "OGONE_TEST_URL", 
+TEST_URL = getattr(settings, "OGONE_TEST_URL",
     "https://secure.ogone.com/ncol/test/orderstandard.asp")
-PROD_URL = getattr(settings, "OGONE_PROD_URL", 
+PROD_URL = getattr(settings, "OGONE_PROD_URL",
     "https://secure.ogone.com/ncol/prod/orderstandard.asp")
