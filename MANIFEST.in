@@ -1,2 +1,3 @@
-LICENSE.txt
+include LICENSE.txt
+include README.md
 recursive-include examples *.html *.txt *.py *.js
