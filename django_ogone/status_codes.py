@@ -58,8 +58,44 @@ Statuses in 2 digits correspond either to 'intermediary' situations or to abnorm
     * 5, this means our system hasn’t sent the requested transaction to the acquirer since the merchant will send the transaction to the acquirer himself, like he specified in his configuration.
 """
 
-ACCEPTED = [9,]
-CANCELLED = [1,]
-NOT_PROCESSED = [0,2,4,41,5,51,52,59,6,61,62,63,7,71,72,73,74,75,
-                 8,81,82,83,84,85,91,92,93,94,95,97,98,99]
-    
+STATUS_DESCRIPTIONS = {
+    0  : 'Incomplete or invalid',
+    1  : 'Cancelled by client',
+    2  : 'Authorization refused',
+    4  : 'Order stored',
+    41 : 'Waiting client payment',
+    5  : 'Authorized',
+    51 : 'Authorization waiting',
+    52 : 'Authorization not known',
+    59 : 'Author. to get manually',
+    6  : 'Authorized and canceled',
+    61 : 'Author. deletion waiting',
+    62 : 'Author. deletion uncertain',
+    63 : 'Author. deletion refused',
+    7  : 'Payment deleted',
+    71 : 'Payment deletion pending',
+    72 : 'Payment deletion uncertain',
+    73 : 'Payment deletion refused',
+    74 : 'Payment deleted (not accepted)',
+    75 : 'Deletion processed by merchant',
+    8  : 'Refund',
+    81 : 'Refund pending',
+    82 : 'Refund uncertain',
+    83 : 'Refund refused',
+    84 : 'Payment declined by the acquirer (will be debited)',
+    85 : 'Refund processed by merchant',
+    9  : 'Payment requested',
+    91 : 'Payment processing',
+    92 : 'Payment uncertain',
+    93 : 'Payment refused',
+    94 : 'Refund declined by the acquirer',
+    95 : 'Payment processed by merchant',
+    97 : 'Being processed (intermediate technical status)',
+    98 : 'Being processed (intermediate technical status)',
+    99 : 'Being processed (intermediate technical status)',
+}
+
+SUCCESS_CODES = (5, 4, 9, 41, 51, 91)
+DECLINE_CODES = (2, 93)
+EXCEPTION_CODES = (52, 92)
+CANCEL_CODES = (1, )
