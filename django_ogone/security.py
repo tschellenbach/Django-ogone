@@ -1,6 +1,5 @@
 import hashlib, logging
 
-from alternative_signing import create_hash
 
 class OgoneSignature(object):
     '''
@@ -60,6 +59,9 @@ class OgoneSignature(object):
     '''
 
     def __init__(self, data, hash_method, secret):
+        assert isinstance(hash_method, str)
+        assert isinstance(secret, str)
+
         self.data = data.copy()
         self.hash_method = hash_method
         self.secret = secret
@@ -96,13 +98,11 @@ class OgoneSignature(object):
         logging.debug('Sorted data: %s', sorted_data)
         
         pre_sign_string = self._merge_data(sorted_data)
-        logging.debug('String to sign: %s', pre_sign_string)
+        logging.debug('String to sign: (normal) %s', pre_sign_string)
         
         signed = self._sign_string(pre_sign_string)
         logging.debug('Signed data: %s', signed)
-        
-        assert create_hash(self.data, self.secret, getattr(hashlib, self.hash_method)) == signed
-        
+                
         return signed
 
     def __unicode__(self):
