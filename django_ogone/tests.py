@@ -12,6 +12,7 @@ class OgoneTestCase(unittest.TestCase):
             SHA_POST_SECRET = 'test12345'
             HASH_METHOD = 'sha512'
             PRODUCTION = False
+            PSPID = 'mycutePSP'
         
         self.settings = Settings()
 
