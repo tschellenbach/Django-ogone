@@ -18,7 +18,7 @@ def create_hash(params, secret, hashfunc=sha512):
     
     """
     
-    logging.debug('Creating hash for: %s', params)
+    logging.debug('Creating hash using algorith %s', hashfunc)
     
     # First, sort out the keys
     keys = params.keys()
@@ -32,7 +32,8 @@ def create_hash(params, secret, hashfunc=sha512):
             # If not empty, add KEY=valuesecret to signelements
             signstring += '%s=%s%s' % (key.upper(), params[key], secret)
     
-    logging.debug('String to sign: %s', signstring)
+    logging.debug('String to sign: (alternative) %s', signstring)
+    
     # Join the string
     signstring = ''.join(signstring)
     
@@ -41,6 +42,8 @@ def create_hash(params, secret, hashfunc=sha512):
     
     # Uppercase the hash
     signhashupper = signhash.upper()
+    
+    logging.debug('Signed data: (alternative) %s', signhashupper)
     
     return signhashupper
 
