@@ -7,6 +7,8 @@ from django_ogone import status_codes
 from django_ogone import exceptions as ogone_exceptions
 from django_ogone import settings as ogone_settings
 from django_ogone import security as ogone_security
+from django_ogone import forms as ogone_forms
+
 
 class Ogone(object):
     """
@@ -18,7 +20,10 @@ class Ogone(object):
     And handling the update functionality
     """
 
-    def __init__(self, params=None, request=None):
+    def __init__(self, params=None, request=None, settings=ogone_settings):
+        # This allows us to override settings for the whole class
+        self.settings=settings
+        
         assert request or params, \
             'Please specify either a request or a set of parameters'
 
@@ -34,26 +39,26 @@ class Ogone(object):
         # We haven't parsed anything yet
         self.parsed = False
 
-    @classmethod
-    def _normalize_params(cls, params):
+    @staticmethod
+    def _normalize_params(params):
         """ Make sure all the dictionary keys are upper case. """
         
         return dict([(k.upper(), v) for k, v in params.items()])
     
-    @classmethod
-    def _parse_orderid(cls, params):
+    @staticmethod
+    def _parse_orderid(params):
         params.update({'ORDERID': int(params.get('ORDERID'))})
         
         return params
     
-    @classmethod
-    def _parse_status(cls, params):
+    @staticmethod
+    def _parse_status(params):
         params.update({'STATUS': int(params.get('STATUS'))})
         
         return params
     
-    @classmethod
-    def _parse_trxdate(cls, params):
+    @staticmethod
+    def _parse_trxdate(params):
         v = params.get('TRXDATE')
 
         import datetime
@@ -106,26 +111,42 @@ class Ogone(object):
     def get_signature(self):
         self.parsed or self.parse_params()
 
-    @classmethod
-    def sign(self, data, hash_method=ogone_settings.HASH_METHOD,
-             secret=ogone_settings.SHA_PRE_SECRET, out=False):
+    @staticmethod
+    def sign(data, hash_method=None, secret=None, out=False,
+             settings=ogone_settings):
         """ Sign the given data. """
-        
-        if secret == ogone_settings.SHA_PRE_SECRET and out:
-            secret = ogone_settings.SHA_POST_SECRET
-        return ogone_security.OgoneSignature(data,
-                    hash_method=ogone_settings.HASH_METHOD,
-                    secret=ogone_settings.SHA_PRE_SECRET).signature()
 
-    @classmethod
-    def get_action(self, production=ogone_settings.PRODUCTION):
+        if not hash_method:
+            hash_method = settings.HASH_METHOD
+        
+        if not secret:
+            if out:
+                secret = settings.SHA_POST_SECRET
+            else:
+                secret = settings.SHA_PRE_SECRET
+
+        return ogone_security.OgoneSignature(data,
+                    hash_method=hash_method,
+                    secret=secret).signature()
+
+    @staticmethod
+    def get_action(production=None, settings=ogone_settings):
         """ Get the relevant action parameter from the settings. """
 
         if production:
-            return ogone_settings.PROD.URL
+            return settings.PROD.URL
         else:
-            return ogone_settings.TEST_URL
+            return settings.TEST_URL
+    
+    @classmethod
+    def get_form(cls, data, settings=ogone_settings):
+        data['SHASign'] = cls.sign(data, settings=settings)
 
+        logging.debug('Sending the following data to Ogone: %s', data)
+        form = ogone_forms.OgoneForm(data)
+    
+        return form
+    
     def is_valid(self):
         """ Verify the signature for the current parameters. Used in Ogone
             OUT flow. Returns either True or False
