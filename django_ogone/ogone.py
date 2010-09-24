@@ -16,43 +16,101 @@ class Ogone(object):
     Used for signing the out flow
 
     And handling the update functionality
-
-    >>> from django_ogone import Ogone
-    >>> params = {u'ORDERID': u'13', u'STATUS': u'9', u'CARDNO': u'XXXXXXXXXXXX1111', u'VC': u'NO', u'PAYID': u'8285812', u'CN': u'Kaast Achternaam', u'NCERROR': u'0', u'IP': u'82.139.114.10', u'IPCTY': u'NL', u'CURRENCY': u'EUR', u'CCCTY': u'US', u'SHASIGN': u'D90EFA06285DA1344F4CC7E5EF1887C2B2F28AAF35A5E2BE8666C0C6FCC41710B77D1662FC86A030AC8B032A2C819AC6B8E3DD36D80E2ED1A0947B4B83DD1C99', u'AAVCHECK': u'NO', u'BRAND': u'VISA', u'ACCEPTANCE': u'test123', u'ECI': u'7', u'TRXDATE': u'09/24/10', u'AMOUNT': u'6794.81', u'CVCCHECK': u'NO', u'ED': u'0111', u'PM': u'CreditCard'}
-    >>> o = Ogone(params)
-    >>> o.is_valid()
-    'D90EFA06285DA1344F4CC7E5EF1887C2B2F28AAF35A5E2BE8666C0C6FCC41710B77D1662FC86A030AC8B032A2C819AC6B8E3DD36D80E2ED1A0947B4B83DD1C99'
-    >>> o.get_status_category()
-    'success'
-    >>> o.get_status_description(9)
-    'Payment requested'
-
     """
 
     def __init__(self, params=None, request=None):
-        self.request = request
-        self.params = self._normalize_params(params) or {}
+        assert request or params, \
+            'Please specify either a request or a set of parameters'
 
-    def _normalize_params(self, params):
+        if not params:
+            params = request.GET or request.POST
+
+        if not params:
+            raise ogone_exceptions.InvalidParamsException("No parameters found.")
+
+        # We allways want our data to be normalized
+        self.params = self._normalize_params(params)
+        
+        # We haven't parsed anything yet
+        self.parsed = False
+
+    @classmethod
+    def _normalize_params(cls, params):
+        """ Make sure all the dictionary keys are upper case. """
+        
         return dict([(k.upper(), v) for k, v in params.items()])
+    
+    @classmethod
+    def _parse_orderid(cls, params):
+        params.update({'ORDERID': int(params.get('ORDERID'))})
+        
+        return params
+    
+    @classmethod
+    def _parse_status(cls, params):
+        params.update({'STATUS': int(params.get('STATUS'))})
+        
+        return params
+    
+    @classmethod
+    def _parse_trxdate(cls, params):
+        v = params.get('TRXDATE')
+
+        import datetime
+        
+        month, day, year = map(int, v.split('/'))
+        v = datetime.date(day, month, year)
+        
+        params.update({'TRXDATE': v})
+        
+        return params
 
     def compute_signature(self, *args, **kwargs):
+        """ Compute a signature for the current parameters. """
+        
         return Ogone.sign(self.params, *args, **kwargs)
 
     def parse_params(self):
-        '''return the ogone params with some pre parsing'''
-        parsed_params = self.params.copy()
-        import datetime
-        for k, v in parsed_params.items():
-            if k == 'TRXDATE' and v:
-                month, day, year = map(int, v.split('/'))
-                v = datetime.date(day, month, year)
-                parsed_params[k] = v
-        return parsed_params
+        """ Validate and convert the eligible elements to 
+            native Python types. """
+        
+        assert self.params
+        
+        # We're not gonna work on an invalid form
+        if not self.is_valid():
+            raise ogone_exceptions.InvalidSignatureException("ogone_signature (%s) != \nsignature (%s)" % (ogone_signature, signature))
+
+        # This first one creates a copy of our params dict
+        self.parsed_params = self._normalize_params(self.params)
+        
+        # These update the dict in-place
+        self._parse_trxdate(self.parsed_params)
+        self._parse_status(self.parsed_params)
+        self._parse_orderid(self.parsed_params)
+        
+        # Mark ourselves as parsed
+        self.parsed = True
+        
+        return self.parsed_params
+    
+    def get_orderid(self):
+        self.parsed or self.parse_params()
+        
+        return self.parsed_params['ORDERID']
+    
+    def get_status(self):
+        self.parsed or self.parse_params()
+        
+        return self.parsed_params['STATUS']
+    
+    def get_signature(self):
+        self.parsed or self.parse_params()
 
     @classmethod
-    def sign(self, data, hash_method = ogone_settings.HASH_METHOD,
+    def sign(self, data, hash_method=ogone_settings.HASH_METHOD,
              secret=ogone_settings.SHA_PRE_SECRET, out=False):
+        """ Sign the given data. """
+        
         if secret == ogone_settings.SHA_PRE_SECRET and out:
             secret = ogone_settings.SHA_POST_SECRET
         return ogone_security.OgoneSignature(data,
@@ -69,57 +127,24 @@ class Ogone(object):
             return ogone_settings.TEST_URL
 
     def is_valid(self):
-        '''
-        Is valid functionality for the ogone OUT flow
-        compares provided signature to our own computation
-        '''
-        if not self.params:
-            raise ogone_exceptions.InvalidParamsException("no parameters in the request")
+        """ Verify the signature for the current parameters. Used in Ogone
+            OUT flow. Returns either True or False
+        """
+
         ogone_signature = self.get_ogone_signature()
         signature = self.compute_signature(out=True)
 
-        if signature != ogone_signature:
-            raise ogone_exceptions.InvalidSignatureException("ogone_signature (%s) != \nsignature (%s)" % (ogone_signature, signature))
-
-        return signature
+        return signature == ogone_signature
 
     def get_ogone_signature(self):
+        assert 'SHASIGN' in self.params, \
+            'No signature found. Are you sure this is coming from Ogone?'
+        
         return self.params.get('SHASIGN')
 
-    def get_order_id(self):
-        return int(self.params.get('ORDERID'))
-
-    @classmethod
-    def get_status_description(cls, status):
-        assert isinstance(status, int)
-        
-        return status_codes.STATUS_DESCRIPTIONS[status]
-        
+    def get_status_description(self):
+        return status_codes.get_status_description(self.get_status())
+    
     def get_status_category(self):
-        """ The Ogone API allows for four kind of results:
-            - success
-            - decline
-            - exception
-            - cancel 
-            
-            In this function we do mapping from the status
-            number into one of these categories of results.
-        """
+        return status_codes.get_status_category(self.get_status())
         
-        status = int(self.params.get('STATUS', 0))
-        
-        logging.debug('Processing status message %d', status)
-        
-        if status in status_codes.SUCCESS_CODES:
-            return status_codes.SUCCESS_STATUS
-        
-        if status in status_codes.DECLINE_CODES:
-            return status_codes.DECLINE_STATUS
-        
-        if status in status_codes.EXCEPTION_CODES:
-            return status_codes.EXCEPTION_STATUS
-        
-        if status in status_codes.CANCEL_CODES:
-            return status_codes.CANCEL_STATUS
-
-        raise UnknownStatusException(status)
