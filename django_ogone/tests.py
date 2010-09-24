@@ -12,7 +12,7 @@ class OgoneTestCase(unittest.TestCase):
             SHA_POST_SECRET = 'test12345'
             HASH_METHOD = 'sha512'
             PRODUCTION = False
-            PSPID = 'mycutePSP'
+            PSPID = 'mycutePS'
         
         self.settings = Settings()
 
@@ -46,7 +46,8 @@ class OgoneTestCase(unittest.TestCase):
         self.assertEqual(o.get_status_description(), 'Payment requested')
     
     def testForm(self):
-        data = {'orderID': 14, 'ownerstate': u'', 'cn': u'Kaast Achternaam', 'language': 'en_US', 'PSPID': 'tdnonlineshop', 'ownertown': u'Klaas', 'ownercty': u'NL', 'exceptionurl': u'http://127.0.0.1:8000/shop/checkout/ogone/failure/', 'ownerzip': u'Postcode', 'catalogurl': u'http://127.0.0.1:8000/shop/category/', 'currency': u'EUR', 'amount': u'579', 'declineurl': u'http://127.0.0.1:8000/shop/checkout/ogone/failure/', 'homeurl': u'http://127.0.0.1:8000/shop/', 'cancelurl': u'http://127.0.0.1:8000/shop/checkout/ogone/failure/', 'accepturl': u'http://127.0.0.1:8000/shop/checkout/ogone/success/', 'owneraddress': u'Straat', 'com': u'Order #14: Kaast Achternaam', 'email': u'mathijs@mathijsfietst.nl'}
+        data = {'orderID': 14, 'ownerstate': u'', 'cn': u'Kaast Achternaam', 'language': 'en_US', 'ownertown': u'Klaas', 'ownercty': u'NL', 'exceptionurl': u'http://127.0.0.1:8000/shop/checkout/ogone/failure/', 'ownerzip': u'Postcode', 'catalogurl': u'http://127.0.0.1:8000/shop/category/', 'currency': u'EUR', 'amount': u'579', 'declineurl': u'http://127.0.0.1:8000/shop/checkout/ogone/failure/', 'homeurl': u'http://127.0.0.1:8000/shop/', 'cancelurl': u'http://127.0.0.1:8000/shop/checkout/ogone/failure/', 'accepturl': u'http://127.0.0.1:8000/shop/checkout/ogone/success/', 'owneraddress': u'Straat', 'com': u'Order #14: Kaast Achternaam', 'email': u'mathijs@mathijsfietst.nl'}
+        data['PSPID'] = self.settings.PSPID
         shasign = create_hash(data, self.settings.SHA_PRE_SECRET)
         form = self.ogone.get_form(data, settings=self.settings)
                 
