@@ -136,11 +136,19 @@ class Ogone(object):
     @staticmethod
     def get_action(production=None, settings=ogone_settings):
         """ Get the relevant action parameter from the settings. """
-
-        if production:
-            return settings.PROD.URL
+        
+        PROD_URL = settings.PROD_URL
+        TEST_URL = settings.TEST_URL
+        
+        assert isinstance(PROD_URL, unicode) or isinstance(PROD_URL, str)
+        assert isinstance(TEST_URL, unicode) or isinstance(TEST_URL, str)
+        
+        if production or settings.PRODUCTION:
+            log.debug('Returning production URL: %s', PROD_URL)
+            return PROD_URL
         else:
-            return settings.TEST_URL
+            log.debug('Returning test URL: %s', TEST_URL)
+            return TEST_URL
 
     @classmethod
     def get_form(cls, data, settings=ogone_settings):
