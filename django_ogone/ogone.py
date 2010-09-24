@@ -146,13 +146,15 @@ class Ogone(object):
     def get_form(cls, data, settings=ogone_settings):
         # Check for obligatory fields
         assert 'language' in data
-        assert 'currency' in data
         assert 'orderID' in data
         assert 'amount' in data
 
         # Make sure amount is an int
         assert str(int(data['amount'])) == data['amount']
 
+        if not 'currency' in data:
+            data['currency'] = settings.CURRENCY
+            
         data['PSPID'] = settings.PSPID
         data['SHASign'] = cls.sign(data, settings=settings)
 
