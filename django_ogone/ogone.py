@@ -78,27 +78,28 @@ class Ogone(object):
     def get_order_id(self):
         return int(self.params.get('ORDERID'))
 
-    def get_status_category(self):
-        '''
-        Maps the status param to a category
-        '''
-        from django.conf import settings
-
-        logging.debug('Processing status message from Ogone. Params: %s', self.params)
-        status = int(self.params.get('STATUS', None))
-
-        if status in status_codes.ACCEPTED:            
-            signals.ogone_payment_accepted.send(order_id=order_id,
-                    amount=Decimal(self.params.get('AMOUNT'))/100, 
-                    currency=Decimal(self.params.get('CURRENCY')))
-
-            return status_codes.ACCEPTED
-        
-        if status in status_codes.CANCELLED:
-            return status_codes.CANCELLED
-            
-        if status in status_codes.NOT_PROCESSED:
-            return status_codes.NOT_PROCESSED
-            
-        raise UnknownStatusException(status)
-
+    # REWORK THIS CODE
+    # def get_status_category(self):
+    #     '''
+    #     Maps the status param to a category
+    #     '''
+    #     from django.conf import settings
+    # 
+    #     logging.debug('Processing status message from Ogone. Params: %s', self.params)
+    #     status = int(self.params.get('STATUS', None))
+    # 
+    #     if status in status_codes.SUCCESS:            
+    #         signals.ogone_payment_accepted.send(order_id=order_id,
+    #                 amount=Decimal(self.params.get('AMOUNT'))/100, 
+    #                 currency=Decimal(self.params.get('CURRENCY')))
+    # 
+    #         return status_codes.SUCCESS
+    #     
+    #     if status in status_codes.CANCELLED:
+    #         return status_codes.CANCELLED
+    #         
+    #     if status in status_codes.NOT_PROCESSED:
+    #         return status_codes.NOT_PROCESSED
+    #         
+    #     raise UnknownStatusException(status)
+    # 
