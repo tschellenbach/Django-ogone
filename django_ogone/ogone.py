@@ -102,7 +102,7 @@ class Ogone(object):
         
         return self.parsed_params
     
-    def get_orderid(self):
+    def get_order_id(self):
         self.parsed or self.parse_params()
         
         return self.parsed_params['ORDERID']

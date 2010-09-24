@@ -41,7 +41,7 @@ class OgoneTestCase(unittest.TestCase):
         o = self.ogone(params, settings=self.settings)
         o.parse_params()
         
-        self.assertEqual(o.get_orderid(), 13)
+        self.assertEqual(o.get_order_id(), 13)
         self.assertEqual(o.get_status(), 9)
         self.assertEqual(o.get_status_description(), 'Payment requested')
     
