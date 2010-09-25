@@ -1,4 +1,11 @@
+*.o
+*.pyc
+*.pyo
+.DS\_Store
+*.sw?
+*.egg-info*
 .svn
+*.svn
 *.pyc
 .pydevproject
 .project
