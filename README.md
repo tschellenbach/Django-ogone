@@ -99,5 +99,5 @@ This signal allows you to automatically update the payment information
 
 ### Resources ###
 
-This one made my life easier.
-[![Older implementation]](http://github.com/jsmits/django-payment-ogone)
+This older implementation made my life easier. Many thanks to jsmits.
+[Django payment ogone][http://github.com/jsmits/django-payment-ogone]
