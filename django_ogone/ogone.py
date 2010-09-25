@@ -40,6 +40,56 @@ class Ogone(object):
         self.parsed = False
 
     @staticmethod
+    def get_action(production=None, settings=ogone_settings):
+        """ Get the relevant action parameter from the settings. """
+        
+        PROD_URL = settings.PROD_URL
+        TEST_URL = settings.TEST_URL
+        
+        assert isinstance(PROD_URL, unicode) or isinstance(PROD_URL, str)
+        assert isinstance(TEST_URL, unicode) or isinstance(TEST_URL, str)
+        
+        if production or settings.PRODUCTION:
+            log.debug('Returning production URL: %s', PROD_URL)
+            return PROD_URL
+        else:
+            log.debug('Returning test URL: %s', TEST_URL)
+            return TEST_URL
+
+    @classmethod
+    def get_form(cls, data, settings=ogone_settings):
+        # Check for obligatory fields
+        assert 'language' in data
+        assert 'orderID' in data
+        assert 'amount' in data
+
+        # Make sure amount is an int
+        assert isinstance(data['amount'], (int, long)) or data['amount'].isdigit()
+
+        data['currency'] = data.get('currency') or settings.CURRENCY
+            
+        data['PSPID'] = settings.PSPID
+        data['SHASign'] = cls.sign(data, settings=settings)
+
+        log.debug('Sending the following data to Ogone: %s', data)
+        form = ogone_forms.OgoneForm(data)
+
+        return form
+
+    def is_valid(self):
+        """ Verify the signature for the current parameters. Used in Ogone
+            OUT flow. Returns either True or False
+        """
+
+        ogone_signature = self.get_ogone_signature()
+        signature = self.compute_signature(out=True)
+
+        return signature == ogone_signature
+
+
+
+
+    @staticmethod
     def _normalize_params(params):
         """ Make sure all the dictionary keys are upper case. """
 
@@ -133,53 +183,7 @@ class Ogone(object):
                     hash_method=hash_method,
                     secret=secret).signature()
 
-    @staticmethod
-    def get_action(production=None, settings=ogone_settings):
-        """ Get the relevant action parameter from the settings. """
-        
-        PROD_URL = settings.PROD_URL
-        TEST_URL = settings.TEST_URL
-        
-        assert isinstance(PROD_URL, unicode) or isinstance(PROD_URL, str)
-        assert isinstance(TEST_URL, unicode) or isinstance(TEST_URL, str)
-        
-        if production or settings.PRODUCTION:
-            log.debug('Returning production URL: %s', PROD_URL)
-            return PROD_URL
-        else:
-            log.debug('Returning test URL: %s', TEST_URL)
-            return TEST_URL
 
-    @classmethod
-    def get_form(cls, data, settings=ogone_settings):
-        # Check for obligatory fields
-        assert 'language' in data
-        assert 'orderID' in data
-        assert 'amount' in data
-
-        # Make sure amount is an int
-        assert str(int(data['amount'])) == data['amount']
-
-        if not 'currency' in data:
-            data['currency'] = settings.CURRENCY
-            
-        data['PSPID'] = settings.PSPID
-        data['SHASign'] = cls.sign(data, settings=settings)
-
-        log.debug('Sending the following data to Ogone: %s', data)
-        form = ogone_forms.OgoneForm(data)
-
-        return form
-
-    def is_valid(self):
-        """ Verify the signature for the current parameters. Used in Ogone
-            OUT flow. Returns either True or False
-        """
-
-        ogone_signature = self.get_ogone_signature()
-        signature = self.compute_signature(out=True)
-
-        return signature == ogone_signature
 
     def get_ogone_signature(self):
         assert 'SHASIGN' in self.params, \

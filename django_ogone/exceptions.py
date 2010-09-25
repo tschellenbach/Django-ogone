@@ -1,11 +1,14 @@
 
-class InvalidSignatureException(Exception):
+class OgoneException(Exception):
     pass
 
-class InvalidParamsException(Exception):
+class InvalidSignatureException(OgoneException):
     pass
 
-class UnknownStatusException(Exception):
+class InvalidParamsException(OgoneException):
+    pass
+
+class UnknownStatusException(OgoneException):
     def __init__(self, status):
         assert isinstance(status, int)
 
