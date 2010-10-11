@@ -55,24 +55,28 @@ class Ogone(object):
         else:
             log.debug('Returning test URL: %s', TEST_URL)
             return TEST_URL
-
-    @classmethod
-    def get_form(cls, data, settings=ogone_settings):
+        
+    @classmethod    
+    def get_data(cls, data, settings=ogone_settings):
         # Check for obligatory fields
         assert 'language' in data
         assert 'orderID' in data
         assert 'amount' in data
-
         # Make sure amount is an int
         assert isinstance(data['amount'], (int, long)) or data['amount'].isdigit()
-
+        
         data['currency'] = data.get('currency') or settings.CURRENCY
-            
         data['PSPID'] = settings.PSPID
         data['SHASign'] = cls.sign(data, settings=settings)
+        
+        return data
+        
+    @classmethod
+    def get_form(cls, data, settings=ogone_settings):
+        enriched_data = cls.get_data(data, settings)
 
-        log.debug('Sending the following data to Ogone: %s', data)
-        form = ogone_forms.OgoneForm(data)
+        log.debug('Sending the following data to Ogone: %s', enriched_data)
+        form = ogone_forms.OgoneForm(enriched_data)
 
         return form
 

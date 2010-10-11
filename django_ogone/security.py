@@ -76,7 +76,7 @@ class OgoneSignature(object):
 
     def _filter_data(self, k, v):
         valid = True
-        if v == '':
+        if v == '' or v is None:
             valid = False
         if k == 'SHASIGN':
             valid = False

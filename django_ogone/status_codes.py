@@ -1,4 +1,4 @@
-# coding=utf8
+# coding=utf-8
 """
 Status of the payment.
 
@@ -95,8 +95,11 @@ STATUS_DESCRIPTIONS = {
     99 : 'Being processed (intermediate technical status)',
 }
 
-SUCCESS_CODES = (5, 4, 9, 41, 51, 91)
+SUCCESS_CODES = (5, 9)
 SUCCESS_STATUS = 'success'
+
+PENDING_CODES = (4, 41, 51, 91)
+PENDING_STATUS = 'pending'
 
 DECLINE_CODES = (2, 93)
 DECLINE_STATUS = 'decline'
@@ -104,7 +107,7 @@ DECLINE_STATUS = 'decline'
 EXCEPTION_CODES = (52, 92)
 EXCEPTION_STATUS = 'exception'
 
-CANCEL_CODES = (1, )
+CANCEL_CODES = (1,)
 CANCEL_STATUS = 'cancel'
 
 def get_status_description(status):
@@ -112,7 +115,7 @@ def get_status_description(status):
 
     return STATUS_DESCRIPTIONS[status]
 
-def get_status_category(status):
+def get_status_category(status_id):
     """ The Ogone API allows for four kind of results:
         - success
         - decline
@@ -122,21 +125,17 @@ def get_status_category(status):
         In this function we do mapping from the status
         number into one of these categories of results.
     """
-
-    logging.debug('Processing status message %d', status)
-
-    if status in SUCCESS_CODES:
-        return SUCCESS_STATUS
-
-    if status in DECLINE_CODES:
-        return DECLINE_STATUS
-
-    if status in EXCEPTION_CODES:
-        return EXCEPTION_STATUS
-
-    if status in CANCEL_CODES:
-        return CANCEL_STATUS
-
-    from django_ogone.exceptions import UnknownStatusException
-
-    raise UnknownStatusException(status)
+    if status_id in SUCCESS_CODES:
+        status = SUCCESS_STATUS
+    elif status_id in PENDING_CODES:
+        status = PENDING_STATUS
+    elif status_id in DECLINE_CODES:
+        status = DECLINE_STATUS
+    elif status_id in EXCEPTION_CODES:
+        status = EXCEPTION_STATUS
+    elif status_id in CANCEL_CODES:
+        status = CANCEL_STATUS
+    else:
+        from django_ogone.exceptions import UnknownStatusException
+        raise UnknownStatusException(status_id)
+    return status
