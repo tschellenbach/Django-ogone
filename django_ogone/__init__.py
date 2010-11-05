@@ -5,6 +5,6 @@ __email__ = 'thierryschellenbach at googles great mail service'
 # Be careful here, otherwise setup.py won't work
 try:
     from django_ogone.ogone import Ogone
-    __ALL__ = (Ogone, )
+    __ALL__ = (Ogone, OgoneDirectLink)
 except ImportError:
     pass
