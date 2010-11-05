@@ -246,7 +246,7 @@ class OgoneDirectLink(object):
 
         request = urllib2.Request(url)
         request.add_header("Content-type", "application/x-www-form-urlencoded")
-        response = urllib2.urlopen(req, params)
+        response = urllib2.urlopen(request, params)
 
         xml_str = response.read()
         log.info('DirectLink response: %s', xml_str)
