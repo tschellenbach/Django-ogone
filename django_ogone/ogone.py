@@ -1,5 +1,6 @@
 import logging
 import urllib2
+import xml.dom.minidom
 
 log = logging.getLogger('django_ogone')
 
@@ -247,4 +248,10 @@ class OgoneDirectLink(object):
         request.add_header("Content-type", "application/x-www-form-urlencoded")
         response = urllib2.urlopen(req, params)
 
-        return response.read()
+        xml_str = response.read()
+        log.info('DirectLink response: %s', xml_str)
+
+        doc = xml.dom.minidom.parseString(xml_str)
+        attrs = doc.documentElement.attributes
+        return dict([(attrs.item(i).name, attrs.item(i).value) \
+                    for i in range(attrs.length)])
