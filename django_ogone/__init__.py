@@ -1,4 +1,4 @@
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 __maintainer__ = 'Thierry Schellenbach'
 __email__ = 'thierryschellenbach at googles great mail service'
 
