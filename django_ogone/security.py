@@ -82,23 +82,23 @@ class OgoneSignature(object):
             valid = False
         return valid
 
-    def _merge_data(self, data):
+    def _merge_data(self, data, encoding='utf8'):
         pairs = ['%s=%s' % (k, v) for k, v in data]
         pre_sign_string = self.secret.join(pairs) + self.secret
-        return pre_sign_string
+        return pre_sign_string.encode(encoding)
 
     def _sign_string(self, pre_sign_string):
         hashmethod = getattr(hashlib, self.hash_method)
         signed = hashmethod(pre_sign_string).hexdigest().upper()
         return signed
 
-    def signature(self):
+    def signature(self, encoding='utf8'):
         log.debug('Making signature for data: %s', self.data)
         
         sorted_data = self._sort_data(self.data)
         log.debug('Sorted data: %s', sorted_data)
         
-        pre_sign_string = self._merge_data(sorted_data)
+        pre_sign_string = self._merge_data(sorted_data, encoding)
         log.debug('String to sign: (normal) %s', pre_sign_string)
         
         signed = self._sign_string(pre_sign_string)
