@@ -1,4 +1,5 @@
 import logging
+import datetime
 import urllib
 import urllib2
 import xml.dom.minidom
@@ -115,12 +116,11 @@ class Ogone(object):
     def _parse_trxdate(params):
         v = params.get('TRXDATE')
 
-        import datetime
+        if v:
+            month, day, year = map(int, v.split('/'))
+            v = datetime.date(day, month, year)
 
-        month, day, year = map(int, v.split('/'))
-        v = datetime.date(day, month, year)
-
-        params.update({'TRXDATE': v})
+            params.update({'TRXDATE': v})
 
         return params
 
@@ -166,9 +166,6 @@ class Ogone(object):
 
         return self.parsed_params['STATUS']
 
-    def get_signature(self):
-        self.parsed or self.parse_params()
-
     @staticmethod
     def sign(data, hash_method=None, secret=None, out=False,
              settings=ogone_settings):
@@ -202,14 +199,7 @@ class Ogone(object):
         return status_codes.get_status_category(self.get_status())
 
 
-class OgoneDirectLink(object):
-    def __init__(self, params=None, settings=ogone_settings):
-        # This allows us to override settings for the whole class
-        self.settings = settings
-
-        if not params:
-            raise ogone_exceptions.InvalidParamsException("No parameters found.")
-
+class OgoneDirectLink(Ogone):
     @staticmethod
     def get_action(production=None, settings=ogone_settings):
         """ Get the relevant action parameter from the settings. """
@@ -238,6 +228,7 @@ class OgoneDirectLink(object):
         data['PSPID'] = settings.PSPID
         data['USERID'] = settings.USERID
         data['PSWD'] = settings.PSWD
+        data['SHASign'] = Ogone.sign(data, settings=settings)
 
         return data
 
@@ -257,3 +248,7 @@ class OgoneDirectLink(object):
         attrs = doc.documentElement.attributes
         return dict([(attrs.item(i).name, attrs.item(i).value) \
                     for i in range(attrs.length)])
+
+    # DirectLink doesn't return a signature, so, fake the signature coercion.
+    def is_valid(self):
+        return True
