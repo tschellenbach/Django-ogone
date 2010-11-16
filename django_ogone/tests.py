@@ -1,5 +1,6 @@
 import unittest
 import doctest
+import datetime
 
 from django_ogone import security, Ogone
 
@@ -48,6 +49,8 @@ class OgoneTestCase(unittest.TestCase):
         self.assertEqual(o.get_order_id(), 13)
         self.assertEqual(o.get_status(), 9)
         self.assertEqual(o.get_status_description(), 'Payment requested')
+        self.assertEqual(o.get_transaction_date(), datetime.date(2010, 9, 24))
+        self.assertEqual(o.get_expiry_date(), datetime.date(2011, 1, 1))
 
     def testForm(self):
         data = {'orderID': 14, 'ownerstate': u'', 'cn': u'Kaast Achternaam', 'language': 'en_US', 'ownertown': u'Klaas', 'ownercty': u'NL', 'exceptionurl': u'http://127.0.0.1:8000/shop/checkout/ogone/failure/', 'ownerzip': u'Postcode', 'catalogurl': u'http://127.0.0.1:8000/shop/category/', 'currency': u'EUR', 'amount': u'579', 'declineurl': u'http://127.0.0.1:8000/shop/checkout/ogone/failure/', 'homeurl': u'http://127.0.0.1:8000/shop/', 'cancelurl': u'http://127.0.0.1:8000/shop/checkout/ogone/failure/', 'accepturl': u'http://127.0.0.1:8000/shop/checkout/ogone/success/', 'owneraddress': u'Straat', 'com': u'Order #14: Kaast Achternaam', 'email': u'mathijs@mathijsfietst.nl'}

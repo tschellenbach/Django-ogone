@@ -118,9 +118,29 @@ class Ogone(object):
 
         if v:
             month, day, year = map(int, v.split('/'))
-            v = datetime.date(day, month, year)
+            # Ogone responds with a year coded on 2 digits. Add, the 2000
+            # years delta.
+            year += 2000
+            # --//--
+            v = datetime.date(year, month, day)
 
             params.update({'TRXDATE': v})
+
+        return params
+
+    @staticmethod
+    def _parse_ed(params):
+        v = params.get('ED')
+
+        if v:
+            month, year = int(v[:2]), int(v[-2:])
+            # Ogone responds with a year coded on 2 digits. Add, the 2000
+            # years delta.
+            year += 2000
+            # --//--
+            v = datetime.date(year, month, 1)
+
+            params.update({'ED': v})
 
         return params
 
@@ -148,6 +168,7 @@ class Ogone(object):
 
         # These update the dict in-place
         self._parse_trxdate(self.parsed_params)
+        self._parse_ed(self.parsed_params)
         self._parse_status(self.parsed_params)
         self._parse_orderid(self.parsed_params)
 
@@ -165,6 +186,16 @@ class Ogone(object):
         self.parsed or self.parse_params()
 
         return self.parsed_params['STATUS']
+
+    def get_transaction_date(self):
+        self.parsed or self.parse_params()
+
+        return self.parsed_params['TRXDATE']
+
+    def get_expiry_date(self):
+        self.parsed or self.parse_params()
+
+        return self.parsed_params['ED']
 
     @staticmethod
     def sign(data, hash_method=None, secret=None, out=False,
