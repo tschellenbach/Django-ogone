@@ -25,7 +25,7 @@ CURRENCY = getattr(settings, 'OGONE_CURRENCY', 'EUR')
 HASH_METHOD = getattr(settings, 'OGONE_HASH_METHOD', 'sha512')
 #for other hashmethods see http://docs.python.org/library/hashlib.html
 #ogone default is sha1
-PRODUCTION = not getattr(settings, 'DEBUG', True)
+PRODUCTION = not getattr(settings, 'OGONE_DEBUG', True)
 
 # Standard URLs. We might want to override these in the future for some
 # reason.
