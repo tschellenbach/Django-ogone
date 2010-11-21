@@ -53,7 +53,10 @@ class Ogone(object):
         assert isinstance(PROD_URL, unicode) or isinstance(PROD_URL, str)
         assert isinstance(TEST_URL, unicode) or isinstance(TEST_URL, str)
 
-        if production or settings.PRODUCTION:
+        if production is None:
+            production = settings.PRODUCTION
+
+        if production:
             log.debug('Returning production URL: %s', PROD_URL)
             return PROD_URL
         else:
