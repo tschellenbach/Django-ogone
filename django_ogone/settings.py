@@ -34,5 +34,11 @@ TEST_URL = getattr(settings, "OGONE_TEST_URL",
 PROD_URL = getattr(settings, "OGONE_PROD_URL",
     "https://secure.ogone.com/ncol/prod/orderstandard.asp")
 
+# DirectLink
+USERID = getattr(settings, 'OGONE_USERID', None)
+PSWD = getattr(settings, 'OGONE_PSWD', None)
 
-    
+DIRECT_LINK_TEST_URL = getattr(settings, "OGONE_DIRECT_LINK_TEST_URL",
+    "https://secure.ogone.com/ncol/test/maintenancedirect.asp")
+DIRECT_LINK_PROD_URL = getattr(settings, "OGONE_DIRECT_LINK_PROD_URL",
+    "https://secure.ogone.com/ncol/prod/maintenancedirect.asp")

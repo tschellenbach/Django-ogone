@@ -59,13 +59,14 @@ class OgoneSignature(object):
 
     '''
 
-    def __init__(self, data, hash_method, secret):
+    def __init__(self, data, hash_method, secret, encoding='utf8'):
         assert hash_method in ['sha1', 'sha256', 'sha512']
         assert str(secret)
 
         self.data = data.copy()
         self.hash_method = hash_method
         self.secret = secret
+        self.encoding = encoding
 
     def _sort_data(self, data):
         # This code uppercases two times and is not well readable
@@ -85,7 +86,7 @@ class OgoneSignature(object):
     def _merge_data(self, data):
         pairs = ['%s=%s' % (k, v) for k, v in data]
         pre_sign_string = self.secret.join(pairs) + self.secret
-        return pre_sign_string
+        return pre_sign_string.encode(self.encoding)
 
     def _sign_string(self, pre_sign_string):
         hashmethod = getattr(hashlib, self.hash_method)

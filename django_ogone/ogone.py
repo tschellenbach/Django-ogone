@@ -1,4 +1,8 @@
 import logging
+import datetime
+import urllib
+import urllib2
+import xml.dom.minidom
 
 log = logging.getLogger('django_ogone')
 
@@ -42,21 +46,24 @@ class Ogone(object):
     @staticmethod
     def get_action(production=None, settings=ogone_settings):
         """ Get the relevant action parameter from the settings. """
-        
+
         PROD_URL = settings.PROD_URL
         TEST_URL = settings.TEST_URL
-        
+
         assert isinstance(PROD_URL, unicode) or isinstance(PROD_URL, str)
         assert isinstance(TEST_URL, unicode) or isinstance(TEST_URL, str)
-        
-        if production or settings.PRODUCTION:
+
+        if production is None:
+            production = settings.PRODUCTION
+
+        if production:
             log.debug('Returning production URL: %s', PROD_URL)
             return PROD_URL
         else:
             log.debug('Returning test URL: %s', TEST_URL)
             return TEST_URL
-        
-    @classmethod    
+
+    @classmethod
     def get_data(cls, data, settings=ogone_settings):
         # Check for obligatory fields
         assert 'language' in data
@@ -64,13 +71,13 @@ class Ogone(object):
         assert 'amount' in data
         # Make sure amount is an int
         assert isinstance(data['amount'], (int, long)) or data['amount'].isdigit()
-        
+
         data['currency'] = data.get('currency') or settings.CURRENCY
         data['PSPID'] = settings.PSPID
         data['SHASign'] = cls.sign(data, settings=settings)
-        
+
         return data
-        
+
     @classmethod
     def get_form(cls, data, settings=ogone_settings):
         enriched_data = cls.get_data(data, settings)
@@ -89,9 +96,6 @@ class Ogone(object):
         signature = self.compute_signature(out=True)
 
         return signature == ogone_signature
-
-
-
 
     @staticmethod
     def _normalize_params(params):
@@ -115,12 +119,31 @@ class Ogone(object):
     def _parse_trxdate(params):
         v = params.get('TRXDATE')
 
-        import datetime
+        if v:
+            month, day, year = map(int, v.split('/'))
+            # Ogone responds with a year coded on 2 digits. Add, the 2000
+            # years delta.
+            year += 2000
+            # --//--
+            v = datetime.date(year, month, day)
 
-        month, day, year = map(int, v.split('/'))
-        v = datetime.date(day, month, year)
+            params.update({'TRXDATE': v})
 
-        params.update({'TRXDATE': v})
+        return params
+
+    @staticmethod
+    def _parse_ed(params):
+        v = params.get('ED')
+
+        if v:
+            month, year = int(v[:2]), int(v[-2:])
+            # Ogone responds with a year coded on 2 digits. Add, the 2000
+            # years delta.
+            year += 2000
+            # --//--
+            v = datetime.date(year, month, 1)
+
+            params.update({'ED': v})
 
         return params
 
@@ -148,6 +171,7 @@ class Ogone(object):
 
         # These update the dict in-place
         self._parse_trxdate(self.parsed_params)
+        self._parse_ed(self.parsed_params)
         self._parse_status(self.parsed_params)
         self._parse_orderid(self.parsed_params)
 
@@ -166,8 +190,15 @@ class Ogone(object):
 
         return self.parsed_params['STATUS']
 
-    def get_signature(self):
+    def get_transaction_date(self):
         self.parsed or self.parse_params()
+
+        return self.parsed_params['TRXDATE']
+
+    def get_expiry_date(self):
+        self.parsed or self.parse_params()
+
+        return self.parsed_params['ED']
 
     @staticmethod
     def sign(data, hash_method=None, secret=None, out=False,
@@ -201,3 +232,60 @@ class Ogone(object):
     def get_status_category(self):
         return status_codes.get_status_category(self.get_status())
 
+
+class OgoneDirectLink(Ogone):
+    @staticmethod
+    def get_action(production=None, settings=ogone_settings):
+        """ Get the relevant action parameter from the settings. """
+
+        PROD_URL = settings.DIRECT_LINK_PROD_URL
+        TEST_URL = settings.DIRECT_LINK_TEST_URL
+
+        assert isinstance(PROD_URL, unicode) or isinstance(PROD_URL, str)
+        assert isinstance(TEST_URL, unicode) or isinstance(TEST_URL, str)
+
+        if production is None:
+            production = settings.PRODUCTION
+
+        if production:
+            log.debug('Returning production URL: %s', PROD_URL)
+            return PROD_URL
+        else:
+            log.debug('Returning test URL: %s', TEST_URL)
+            return TEST_URL
+
+    @staticmethod
+    def get_data(data, settings=ogone_settings):
+        # Check required fields
+        assert 'orderID' in data or 'PAYID' in data
+        assert 'amount' in data
+        # Make sure amount is an int
+        assert isinstance(data['amount'], (int, long)) or data['amount'].isdigit()
+
+        data['PSPID'] = settings.PSPID
+        data['USERID'] = settings.USERID
+        data['PSWD'] = settings.PSWD
+        data['SHASign'] = Ogone.sign(data, settings=settings)
+
+        return data
+
+    @classmethod
+    def request(cls, url, data, settings=ogone_settings):
+        params = cls.get_data(data, settings)
+
+        request = urllib2.Request(url)
+        request.add_header("Content-type", "application/x-www-form-urlencoded")
+        params = urllib.urlencode(params)
+        response = urllib2.urlopen(request, params)
+
+        xml_str = response.read()
+        log.info('DirectLink response: %s', xml_str)
+
+        doc = xml.dom.minidom.parseString(xml_str)
+        attrs = doc.documentElement.attributes
+        return dict([(attrs.item(i).name, attrs.item(i).value) \
+                    for i in range(attrs.length)])
+
+    # DirectLink doesn't return a signature, so, fake the signature coercion.
+    def is_valid(self):
+        return True

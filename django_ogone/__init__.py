@@ -1,10 +1,10 @@
-__version__ = '0.1'
+__version__ = '1.1.0'
 __maintainer__ = 'Thierry Schellenbach'
 __email__ = 'thierryschellenbach at googles great mail service'
 
 # Be careful here, otherwise setup.py won't work
 try:
-    from django_ogone.ogone import Ogone
-    __ALL__ = (Ogone, )
+    from django_ogone.ogone import Ogone, OgoneDirectLink
+    __ALL__ = (Ogone, OgoneDirectLink)
 except ImportError:
     pass
