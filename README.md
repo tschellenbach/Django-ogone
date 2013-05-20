@@ -62,8 +62,8 @@ as payed.
 Here an example implementation. Use this to roll your own.
 
 
-from django_ogone.ogone import Ogone
-def order_status_update(request):
+    from django_ogone.ogone import Ogone
+    def order_status_update(request):
     '''
     Updates the order status with ogone data.
     There are two ways of reaching this flow
