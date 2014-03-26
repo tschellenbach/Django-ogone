@@ -1,4 +1,4 @@
-# Django Ogone #
+# Django Ogone - No longer maintained #
 
 By: Thierry Schellenbach (http://www.mellowmorning.com)
 
